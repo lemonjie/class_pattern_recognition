@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 np.random.seed(1)
 
@@ -38,5 +39,8 @@ def gen_datas( mean, rho, k=10000, n=50):
 
     return dataX
 
-data1 = gen_datas(0, 0.7)
-data2 = gen_datas(0.5, 0.9)
+data1 = gen_datas(0, 0.7, n=2)
+data2 = gen_datas(0.5, 0.9, n=2)
+
+plt.plot(data2.T[0], data2.T[1],'o')
+plt.savefig('test2.png')
