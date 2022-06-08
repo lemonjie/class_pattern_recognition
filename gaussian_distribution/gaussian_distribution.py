@@ -13,21 +13,21 @@ def gen_cov_matrix( size, rho ):
 
 def gen_datas( mean, rho, k=10000, n=50):
     dataY = np.random.normal(size=(k, n))
-    #print(data1.shape)
-    #print(data1)
-    #print('mean :', sum(data1.T[0])/10000)
-    #print('standard deviation :', math.sqrt(sum((data1.T[0]-(sum(data1.T[0])/10000))**2)/10000))
+    #print(data0.shape)
+    #print(data0)
+    #print('mean :', sum(data0.T[0])/10000)
+    #print('standard deviation :', math.sqrt(sum((data0.T[0]-(sum(data0.T[0])/10000))**2)/10000))
 
-    cov1 = gen_cov_matrix( n, rho)
-    #print(cov1)
+    cov = gen_cov_matrix( n, rho)
+    #print(cov)
 
-    eigval, eigvec = np.linalg.eig(cov1)
+    eigval, eigvec = np.linalg.eig(cov)
     #print(eigval)
     #print(eigvec)
     #print(eigvec.shape, eigval.shape)
 
-    diag1 = np.diag(1/(eigval**0.5))
-    whitening = (np.dot(eigvec, diag1)).T
+    diag = np.diag(1/(eigval**0.5))
+    whitening = (np.dot(eigvec, diag)).T
     inv_whitening = np.linalg.inv(whitening)
     #print(whitening.shape, inv_whitening.shape)
 
@@ -39,8 +39,13 @@ def gen_datas( mean, rho, k=10000, n=50):
 
     return dataX
 
-data1 = gen_datas(0, 0.7, n=2)
-data2 = gen_datas(0.5, 0.9, n=2)
+data0 = gen_datas(0, 0.9, n=50)
+data1 = gen_datas(0.5, 0.7, n=50)
 
-plt.plot(data2.T[0], data2.T[1],'o')
-plt.savefig('test2.png')
+np.save('data0.npy', data0)
+np.save('data1.npy', data1)
+
+
+plt.plot(data1.T[0], data1.T[1],'og')
+plt.plot(data0.T[0], data0.T[1],'oc')
+plt.savefig('datas.png')
