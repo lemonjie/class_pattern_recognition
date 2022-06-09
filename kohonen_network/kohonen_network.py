@@ -53,11 +53,11 @@ class Data:
         plt.plot(data1.T[0], data1.T[1],'og')
         plt.plot(data0.T[0], data0.T[1],'oc')
         plt.savefig(draw_name)
-
+        plt.clf()
 
 class Kohonen:
     ### a kohonen network with only two layers, one is the 50 dims input, the other is the 2 dims output ###
-    def __init__(self, input_shape, output_dims, learn_rate=0.5, max_iter_data_times=10):
+    def __init__(self, input_shape, output_dims, learn_rate=0.5, max_iter_data_times=100):
         input_num, input_dims = input_shape
 
         self.input_dims = input_dims
@@ -67,14 +67,14 @@ class Kohonen:
         self.learn_rate = learn_rate
         self.max_iteration = input_num * max_iter_data_times
 
-    def get_winner( self, input_x ):
+    def cal_winner( self, input_x ):
         neuron = np.zeros(self.output_dims)
         for ni in range( neuron.shape[0] ):
             neuron[ni] = np.vdot(self.weights[:,ni], input_x)
         winner = np.argmax(neuron)
-        return winner
+        return neuron, winner
 
-    def update_weight( self, winner, input_x, attempts_thres=0.01 ):
+    def update_weight( self, winner, input_x, attempts_thres=1e-3 ):
         step = self.learn_rate*( input_x - self.weights[:,winner] )
         if ( np.linalg.norm(step) < attempts_thres ):
             return False
@@ -89,7 +89,7 @@ class Kohonen:
         for i in range( self.max_iteration ):
             #print(i, end=' ')
             input_x = data[i%data.shape[0]] / np.linalg.norm(data[i%data.shape[0]])
-            winner = self.get_winner( input_x )
+            _, winner = self.cal_winner( input_x )
             if_update = self.update_weight( winner, input_x )
             self.learn_rate -= i/self.max_iteration
             if(not if_update):
@@ -98,11 +98,12 @@ class Kohonen:
         print('End of all iteration.')
 
     def predict( self, data ):
+        predict_data = np.empty(( data.shape[0], self.output_dims ))
         predict_label = np.empty( data.shape[0], dtype=np.int32 )
         for i in range( data.shape[0] ):
-            input_x = data[i]
-            predict_label[i] = self.get_winner( input_x )
-        return predict_label
+            input_x = data[i] / np.linalg.norm(data[i])
+            predict_data[i], predict_label[i] = self.cal_winner( input_x )
+        return predict_data, predict_label
 
 data = Data()
 data.get_dataset( 'data0.npy', 'data1.npy' )
@@ -112,9 +113,10 @@ output_dims = len(set(data.train_label.flatten()))
 kohonen = Kohonen( input_shape, output_dims)
 
 kohonen.fit( data.train_data )
-predict_label = kohonen.predict( data.test_data )
+predict_data, predict_label = kohonen.predict( data.test_data )
 
 data.cal_error_rate( predict_label, data.test_label )
 
 data.draw( 'test_groundtruth.png', data.test_data, data.test_label )
 data.draw( 'test_predict.png', data.test_data, predict_label )
+data.draw( 'test_predict_2D.png', predict_data, predict_label )
