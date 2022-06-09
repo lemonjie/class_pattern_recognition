@@ -44,7 +44,7 @@ class Data:
 
 class Kohonen:
     ### a kohonen network with only two layers, one is the 50 dims input, the other is the 2 dims output ###
-    def __init__(self, input_shape, output_dims, learn_rate=0.5, max_iter_data_times=1000):
+    def __init__(self, input_shape, output_dims, learn_rate=0.5, max_iter_data_times=100):
         input_num, input_dims = input_shape
 
         self.input_dims = input_dims
@@ -65,11 +65,12 @@ class Kohonen:
         return winner
 
     def update_weight( self, winner, input_x, attempts_thres=1e-5 ):
-        new_weights = self.weights[:,winner] + self.learn_rate*( input_x - self.weights[:,winner] )
-        if ( np.linalg.norm(new_weights) < attempts_thres ):
+        step = self.learn_rate*( input_x - self.weights[:,winner] )
+        if ( np.linalg.norm(step) < attempts_thres ):
             return False
         else:
-            print(np.linalg.norm(new_weights))
+            print(np.linalg.norm(step))
+            new_weights = self.weights[:,winner] + step
             new_weights_norm = new_weights / np.linalg.norm(new_weights)
             self.weights[:,winner] = new_weights_norm
             return True
